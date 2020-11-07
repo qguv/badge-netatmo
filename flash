@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+if ! hash pipenv 2> /dev/null; then
+    echo 'pipenv is not installed!'
+    exit 1
+fi
+
+if ! pipenv --venv > /dev/null 2>&1; then
+    pipenv install
+    echo -------
+fi
+
+exec pipenv run python flash.py \
+    badge-netatmo.py:/lib/netatmo/__init__.py \
+    mparse.py:/lib/netatmo/mparse.py \
+    murequests.py:/lib/netatmo/murequests.py \
+    secrets.py:/lib/netatmo/secrets.py \
+    aliases.py:/aliases.py
