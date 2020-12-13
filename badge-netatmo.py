@@ -74,12 +74,17 @@ def init():
     #buttons.attach(buttons.BTN_RIGHT, decrease_override_time)
 
 def update():
-    access_token = get_access_token()
-    home = get_home(access_token)
-    room = get_room(access_token, home['id'])
-    measured = room['therm_measured_temperature']
-    setpoint = room['therm_setpoint_temperature']
-    show('{}\ntemp: {:.1f} C\nset: {:.1f} C'.format(home['name'], measured, setpoint), speed='slow')
+    try:
+        access_token = get_access_token()
+        home = get_home(access_token)
+        room = get_room(access_token, home['id'])
+        measured = room['therm_measured_temperature']
+        setpoint = room['therm_setpoint_temperature']
+        show('{}\ntemp: {:.1f} C\nset: {:.1f} C'.format(home['name'], measured, setpoint), speed='slow')
+    except:
+        return False
+    else:
+        return True
 
 last_update = 0
 last_button = 0
@@ -89,12 +94,16 @@ def loop():
     while True:
         now = utime.ticks_ms()
         if now - last_update > UPDATE_INTERVAL:
+            ok = update()
+            if not ok:
+                continue
             last_update = utime.ticks_ms()
-            update()
         if now - last_button > BUTTON_TIMEOUT and last_button != 0:
             last_button = 0 # only handle button press once
+            ok = update()
+            if not ok:
+                continue
             last_update = now - UPDATE_INTERVAL + 2000 # force update in 2s
-            update()
 
 print("DEBUG: imported as {}".format(__name__))
 if __name__ == "netatmo":
